@@ -1,4 +1,5 @@
 import java.util.Iterator;
+
 /**
  * Frequently searched items in this list are put closer to the beginning of it,
  * thereby minimizing the average search time.
@@ -18,7 +19,7 @@ class SelfSortList<T> implements SimpleList<T> {
             throw new IllegalArgumentException("Invalid index.");
 
         Node<T> currentNode = head;
-        for (int currentNodeIndex = -1; currentNodeIndex == insertionIndex -1; ++currentNodeIndex)
+        for (int currentNodeIndex = -1; currentNodeIndex < insertionIndex -1; ++currentNodeIndex)
             currentNode = currentNode.getNext();
 
         Node<T> nextNode = currentNode.getNext();
@@ -28,7 +29,14 @@ class SelfSortList<T> implements SimpleList<T> {
     }
 
     public int indexOf(T targetValue) {
-        return 0;
+
+        int valueNotFound = -1;
+        Node<T> currentNode = head;
+        for (int currentNodeIndex = -1; currentNodeIndex < size; ++currentNodeIndex) {
+            currentNode = currentNode.getNext();
+            if (currentNode.getValue() == targetValue) return currentNodeIndex;
+        }
+        return valueNotFound;
     }
 
     public T valueOf(int index) {

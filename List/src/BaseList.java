@@ -9,7 +9,6 @@ class BaseList<T> implements Iterable<T> {
         private Node<T> next;
 
         Node(T value, Node<T> next) {
-
             this.value = value;
             this.next = next;
         }
@@ -23,16 +22,12 @@ class BaseList<T> implements Iterable<T> {
     /* use a sentinel node to retain valid state while the list is empty, which simplifies the implementation */
     private final Node<T> head = new Node<>(null, null);
     /* ensure that no modification of the list occurred while an iterator is moving through it */
-    private boolean isModifiedDuringIteration = false;
+    private boolean isModified = false;
     private int size;
 
     //TODO: requiredIndex -1 -- previousNodeIndex (previous?)
-    //TODO: disallow nulls?
 
-    public void insert(T newValue, int insertionIndex) {
-
-        if (newValue == null)
-            throw new IllegalArgumentException("Null values are not allowed.");
+    void insert(T newValue, int insertionIndex) {
         if (insertionIndex < 0  ||  insertionIndex > size)
             throw new IllegalArgumentException("Invalid index.");
 
@@ -44,23 +39,23 @@ class BaseList<T> implements Iterable<T> {
         Node<T> newNode = new Node<>(newValue, nextNode);
         currentNode.setNext(newNode);
         size++;
-        isModifiedDuringIteration = true;
+        isModified = true;
     }
-    //TODO: why not used?
-    public int indexOf(T targetValue) {
 
+    int indexOf(final T targetValue) {
         int valueNotFound = -1;
-        Node<T> currentNode = head;
-        for (int currentNodeIndex = -1; currentNodeIndex < size; ++currentNodeIndex) {
+        if (size == 0) return valueNotFound;
+
+        Node<T> currentNode = head.getNext();
+        for (int currentNodeIndex = 0; currentNodeIndex < size; ++currentNodeIndex) {
+            if (currentNode.getValue().equals(targetValue)) return currentNodeIndex;
             currentNode = currentNode.getNext();
-            if (currentNode.getValue() == targetValue) return currentNodeIndex;
         }
         return valueNotFound;
     }
     //TODO: implement a variant that retains state and use it in iterator and indexOf?
-    public T valueAt(int requiredIndex) {
-
-        if (requiredIndex >= size)
+    T valueAt(int requiredIndex) {
+        if (requiredIndex < 0  ||  requiredIndex >= size)
             throw new IllegalArgumentException("Invalid index");
 
         Node<T> currentNode = head;
@@ -70,8 +65,7 @@ class BaseList<T> implements Iterable<T> {
         return currentNode.getValue();
     }
 
-    public T remove(int requiredIndex) {
-
+    T remove(int requiredIndex) {
         if (requiredIndex >= size)
             throw new IllegalArgumentException("Invalid index");
 
@@ -83,7 +77,7 @@ class BaseList<T> implements Iterable<T> {
         Node<T> newNextNode = nextNode.getNext();
         currentNode.setNext(newNextNode);
         size--;
-        isModifiedDuringIteration = true;
+        isModified = true;
         return nextNode.getValue();
     }
 
@@ -92,7 +86,7 @@ class BaseList<T> implements Iterable<T> {
     @Override
     public Iterator<T> iterator() {
 
-        isModifiedDuringIteration = false;
+        isModified = false;  //fails if get iterator, modify, get another iterator
 
         return new Iterator<T>() {
 
@@ -103,18 +97,16 @@ class BaseList<T> implements Iterable<T> {
 
             @Override
             public T next() {
-
-                if (isModifiedDuringIteration)
+                if (isModified)
                     throw new ConcurrentModificationException("Invalid iterator: the list has been modified");
                 currentNode = currentNode.getNext();
-                return hasNext() ? currentNode.getValue() : null;
+                return currentNode != null ? currentNode.getValue() : null;
             }
         };
     }
 
     @Override
     public boolean equals(Object that) {
-
         if (that == this) return true;
         if (!(that instanceof BaseList)) return false;
         BaseList otherBaseList = (BaseList) that;
@@ -130,11 +122,9 @@ class BaseList<T> implements Iterable<T> {
 
     @Override
     public int hashCode() {
-
         int hashCode = 1;
         for (T value : this)
             hashCode = 31*hashCode + (value==null ? 0 : value.hashCode());
-
         return hashCode;
     }
 }

@@ -19,17 +19,16 @@ class BaseList<T> implements Iterable<T> {
         void setNext(Node<T> next) { this.next = next; }
     }
 
-    /* use a sentinel node to retain valid state while the list is empty, which simplifies the implementation */
+    // use a sentinel node to retain valid state while the list is empty, which simplifies the implementation
     private final Node<T> head = new Node<>(null, null);
-    /* ensure that no modification of the list occurred while an iterator is moving through it */
-    private boolean isModified = false;
+    // ensure that no modification of the list occurred while an iterator is moving through it
+    private int modCount;
     private int size;
 
-    //TODO: requiredIndex -1 -- previousNodeIndex (previous?)
-
     void insert(T newValue, int insertionIndex) {
+        checkForNull(newValue);
         if (insertionIndex < 0  ||  insertionIndex > size)
-            throw new IllegalArgumentException("Invalid index.");
+            throw new IllegalArgumentException("Invalid index");
 
         Node<T> currentNode = head;
         for (int currentNodeIndex = -1; currentNodeIndex < insertionIndex -1; ++currentNodeIndex)
@@ -39,10 +38,11 @@ class BaseList<T> implements Iterable<T> {
         Node<T> newNode = new Node<>(newValue, nextNode);
         currentNode.setNext(newNode);
         size++;
-        isModified = true;
+        modCount++;
     }
 
-    int indexOf(final T targetValue) {
+    int indexOf(T targetValue) {
+        checkForNull(targetValue);
         int valueNotFound = -1;
         if (size == 0) return valueNotFound;
 
@@ -77,7 +77,7 @@ class BaseList<T> implements Iterable<T> {
         Node<T> newNextNode = nextNode.getNext();
         currentNode.setNext(newNextNode);
         size--;
-        isModified = true;
+        modCount++;
         return nextNode.getValue();
     }
 
@@ -86,9 +86,9 @@ class BaseList<T> implements Iterable<T> {
     @Override
     public Iterator<T> iterator() {
 
-        isModified = false;  //fails if get iterator, modify, get another iterator
+        int expectedModCount = modCount;
 
-        return new Iterator<T>() {
+        return new Iterator<>() {
 
             private Node<T> currentNode = head;
 
@@ -97,7 +97,7 @@ class BaseList<T> implements Iterable<T> {
 
             @Override
             public T next() {
-                if (isModified)
+                if (modCount != expectedModCount)
                     throw new ConcurrentModificationException("Invalid iterator: the list has been modified");
                 currentNode = currentNode.getNext();
                 return currentNode != null ? currentNode.getValue() : null;
@@ -126,5 +126,10 @@ class BaseList<T> implements Iterable<T> {
         for (T value : this)
             hashCode = 31*hashCode + (value==null ? 0 : value.hashCode());
         return hashCode;
+    }
+
+    private static void checkForNull(Object that) {
+        if (that == null)
+            throw new IllegalArgumentException("Null values are not supported");
     }
 }

@@ -3,30 +3,30 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 
+import java.util.ConcurrentModificationException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
 class BaseListTest {
 
-    /* utilize throughout the tests to make sure its state remains valid after some use */
+    // utilize throughout the tests to make sure its state remains valid after some use
     private static BaseList<Integer> usedBaseList = new BaseList<>();
-    /* use for comparison to ensure proper function of insertion and removal */
+    // use for comparison to ensure proper function of insertion and removal
     private static List<Integer> referenceLinkedList = new LinkedList<>();
+    private static BaseList<Integer> emptyBaseList = new BaseList<>();
     private static Random random = new Random(System.currentTimeMillis());
-    private static final int MIN_SIZE = 15;
-    private static final int MAX_SIZE = 25;
 
-    /* make random nonempty BaseList and LinkedList with identical contents and reasonable sizes */
+    // make random nonempty BaseList and LinkedList with identical contents and reasonable sizes
     @BeforeAll
     static void simulateRandomWork() {
-        int insertionsCount = MAX_SIZE - MIN_SIZE + random.nextInt(MIN_SIZE +1);
+        int insertionsCount = random.nextInt(11) + 15;    // 15..25
         boolean removalIsPicked = false;    // removals < insertions in any case, so size > 0
         int someValue = random.nextInt();
         usedBaseList.insert(someValue, 0);
         referenceLinkedList.add(0, someValue);
 
-        /* insert items in each iteration and remove items in some iterations */
+        // insert items in each iteration and remove items in some iterations
         while (insertionsCount != 0) {
             int validIndex = random.nextInt(usedBaseList.size());
             someValue = random.nextInt();
@@ -46,11 +46,15 @@ class BaseListTest {
     @Test
     void insertions_and_removals_work_fine() {
         Assertions.assertIterableEquals(referenceLinkedList, usedBaseList);
+        for (int i : usedBaseList) System.out.print(i + " ");
+        System.out.println();
+        for (int i : referenceLinkedList) System.out.print(i + " ");
+
     }
 
     @Test
     void insertion_at_invalid_index_throws() {
-        Executable wrongMove = () -> usedBaseList.insert(0, MAX_SIZE);
+        Executable wrongMove = () -> usedBaseList.insert(0, usedBaseList.size() +1);
         Assertions.assertThrows(IllegalArgumentException.class, wrongMove);
     }
 
@@ -75,7 +79,47 @@ class BaseListTest {
 
     @Test
     void throws_if_search_index_is_invalid() {
-        Executable wrongMove = () -> usedBaseList.valueAt(MAX_SIZE);
+        Executable wrongMove = () -> usedBaseList.valueAt(usedBaseList.size());
         Assertions.assertThrows(IllegalArgumentException.class, wrongMove);
+    }
+
+    @Test
+    void cant_find_value_if_empty() {
+        int expectedIndex = -1;
+        Assertions.assertEquals(expectedIndex, emptyBaseList.indexOf(0));
+    }
+
+    @Test
+    void throws_if_empty_and_search_index_is_invalid() {
+        Executable wrongMove = () -> emptyBaseList.valueAt(emptyBaseList.size());
+        Assertions.assertThrows(IllegalArgumentException.class, wrongMove);
+    }
+
+    @Test
+    void insertion_at_invalid_index_throws_if_empty() {
+        Executable wrongMove = () -> emptyBaseList.insert(0, emptyBaseList.size() +1);
+        Assertions.assertThrows(IllegalArgumentException.class, wrongMove);
+    }
+
+    @Test
+    void insertion_of_null_throws() {
+        Executable wrongMove = () -> emptyBaseList.insert(null, emptyBaseList.size());
+        Assertions.assertThrows(IllegalArgumentException.class, wrongMove);
+    }
+
+    @Test
+    void removal_returns_removed_value() {
+        Assertions.assertEquals(usedBaseList.remove(0), referenceLinkedList.remove(0));
+    }
+
+    @Test
+    void iterator_throws_if_modify_list() {
+        BaseList<String> newList = new BaseList<>();
+        newList.insert("first", 0);
+        newList.insert("second", 0);
+        Executable wrongMove = () -> {
+            for (String ignored : newList) newList.remove(0);
+        };
+        Assertions.assertThrows(ConcurrentModificationException.class, wrongMove);
     }
 }

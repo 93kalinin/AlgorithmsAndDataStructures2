@@ -27,8 +27,13 @@ class BasicList<T> implements Iterable<T> {
     protected int modCount;
     protected int size;
 
-    void insert(T newValue, int insertionIndex) {
-        ListUtils.checkForNull(newValue, "Null values are not supported");
+    BasicList() {}
+    BasicList(Iterable<T> collection) { addAll(collection); }
+    void add(T newValue) { insert(0, newValue); }
+    void addAll(Iterable<T> collection) { collection.forEach(this::add); }
+    int size() { return size; }
+
+    void insert(int insertionIndex, T newValue) {
         if (insertionIndex < 0  ||  insertionIndex > size)
             throw new IllegalArgumentException("Invalid index");
 
@@ -82,6 +87,4 @@ class BasicList<T> implements Iterable<T> {
             }
         };
     }
-
-    int size() { return size; }
 }

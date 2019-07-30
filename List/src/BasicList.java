@@ -3,8 +3,7 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /**
- * A minimal viable implementation of a list.
- * Search and removal can be done via its iterator.
+ * A minimal viable implementation of a list. Search and removal can be done via its iterator.
  * Allows to store null references.
  */
 class BasicList<T> implements Iterable<T> {
@@ -25,6 +24,8 @@ class BasicList<T> implements Iterable<T> {
 
         Node<T> getNext() { return next; }
         void setNext(Node<T> next) { this.next = next; }
+        @Override
+        public String toString() { return (value == null) ? "null" : value.toString(); }
     }
 
     class BasicListIterator<E> implements Iterator<T> {
@@ -68,9 +69,11 @@ class BasicList<T> implements Iterable<T> {
     void add(T newValue) { insert(0, newValue); }
     void addAll(Iterable<T> collection) { collection.forEach(this::add); }
     int size() { return size; }
+    @Override
+    public Iterator<T> iterator() { return new BasicListIterator<T>(); }
 
     void insert(int insertionIndex, T newValue) {
-        Node<T> left = getPreviousNode(insertionIndex);
+        Node<T> left = getNodePrecedingTo(insertionIndex);
         Node<T> right = left.getNext();
         Node<T> middle = new Node<>(newValue, right);
         left.setNext(middle);
@@ -78,19 +81,13 @@ class BasicList<T> implements Iterable<T> {
         modCount++;
     }
 
-    @Override
-    public Iterator<T> iterator() { return new BasicListIterator<T>(); }
+    Node<T> getNodePrecedingTo(int index) {
+        if (index < 0  ||  index > size)
+            throw new IllegalArgumentException("Invalid index");
 
-    Node<T> getPreviousNode(int index) {
-        checkIndex(index);
         Node<T> currentNode = head;
         for (int currentNodeIndex = -1; currentNodeIndex < index -1; ++currentNodeIndex)
             currentNode = currentNode.getNext();
         return currentNode;
-    }
-
-    void checkIndex(int index) {
-        if (index < 0  ||  index > size)
-            throw new IllegalArgumentException("Invalid index");
     }
 }

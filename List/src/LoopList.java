@@ -78,9 +78,11 @@ public class LoopList<T> extends BasicList<T> {
             hare = hare.getNext().getNext();
             tortoise = tortoise.getNext();
         }
-        hare = head.getNext();
-        while (hare != tortoise)
+        hare = head;
+        while (hare != tortoise) {
             hare = hare.getNext();
+            tortoise = tortoise.getNext();
+        }
         /* at this point mare and tortoise are both at the start of the loop */
         while (tortoise.getNext() != hare)
             tortoise = tortoise.getNext();

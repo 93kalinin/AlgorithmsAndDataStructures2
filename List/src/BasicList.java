@@ -14,7 +14,7 @@ class BasicList<T> implements Iterable<T> {
 
     static class Node<T> {
 
-        final T value;
+        private T value;
         private Node<T> next;
 
         Node(T value, Node<T> next) {
@@ -64,10 +64,7 @@ class BasicList<T> implements Iterable<T> {
         }
     }
 
-    BasicList() {}
-    BasicList(Iterable<T> collection) { addAll(collection); }
     void add(T newValue) { insert(0, newValue); }
-    void addAll(Iterable<T> collection) { collection.forEach(this::add); }
     int size() { return size; }
     @Override
     public Iterator<T> iterator() { return new BasicListIterator<T>(); }

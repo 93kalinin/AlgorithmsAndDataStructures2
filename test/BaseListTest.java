@@ -3,19 +3,16 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 
-import java.util.ConcurrentModificationException;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.Random;
+import java.util.*;
 
-class BasicListTest {
+class BaseListTest {
 
     private static Random random = new Random(System.currentTimeMillis());
 
     @Test
-    @DisplayName("random insertions and removals")
+    @DisplayName("random insertions and removals work fine")
     void randomInsertionsAndRemovals() {
-        BasicList<Integer> testList = new BasicList<>();
+        BaseList<Integer> testList = new BaseList<>();
         LinkedList<Integer> stdList = new LinkedList<>();
         int insertionsCount = random.nextInt(11) + 15;    // 15..25
 
@@ -42,7 +39,7 @@ class BasicListTest {
     @Test
     @DisplayName("iterator throws if the list is modified during iteration")
     void iteratorThrowsIfModified() {
-        BasicList<String> testList = new BasicList<>();
+        BaseList<String> testList = new BaseList<>();
         testList.add("need at least 2 items");
         testList.add("one more");
 
@@ -53,7 +50,7 @@ class BasicListTest {
     @Test
     @DisplayName("iterator throws if remove() is called before next()")
     void iteratorThrowsOnEarlyRemove() {
-        BasicList<String> testList = new BasicList<>();
+        BaseList<String> testList = new BaseList<>();
         testList.add("something to remove");
         Iterator<String> iter = testList.iterator();
 
@@ -64,7 +61,7 @@ class BasicListTest {
     @Test
     @DisplayName("iterator throws if remove() is called twice in a row")
     void iteratorThrowsOnDoubleRemove() {
-        BasicList<String> list = new BasicList<>();
+        BaseList<String> list = new BaseList<>();
         list.add("nonempty list");
         list.add("one more");
         Iterator<String> iter = list.iterator();

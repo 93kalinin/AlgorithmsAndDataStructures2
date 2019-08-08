@@ -98,16 +98,19 @@ public class LinkedList<T> implements Iterable<T> {
     public int hashCode() {
         if (modCountForCachedHash == modCount)
             return cachedHash;
-        cachedHash = 0;
+        cachedHash = 1;
         for (T value : this)
-            cachedHash += value.hashCode();
+            cachedHash = 31*cachedHash + value.hashCode();
         modCountForCachedHash = modCount;
         return cachedHash;
     }
 
-    public void insert(int insertionIndex, T newValue) {
+    public void insert(int index, T newValue) {
         Objects.requireNonNull(newValue, "Null values are prohibited");
-        Node<T> right = getNodeByIndex(insertionIndex);
+        if (index < 0  ||  index > size)
+            throw new IllegalArgumentException("Invalid index: " + index);
+
+        Node<T> right = getNodeByIndex(index);
         Node<T> left = right.previous;
         Node<T> newNode = new Node<>(newValue);
 
@@ -120,6 +123,9 @@ public class LinkedList<T> implements Iterable<T> {
     }
 
     public T remove(int index) {
+        if (index < 0  ||  index >= size)
+            throw new IllegalArgumentException("Invalid index: " + index);
+
         Node<T> removed = getNodeByIndex(index);
         Node<T> left = removed.previous;
         Node<T> right = removed.next;
@@ -140,13 +146,7 @@ public class LinkedList<T> implements Iterable<T> {
     public int size()
     { return size; }
 
-    /**
-     * @return the node OR tail if index == size
-     */
     protected Node<T> getNodeByIndex(int index) {
-        if (index < 0  ||  index > size)
-            throw new IllegalArgumentException("Invalid index: " + index);
-
         Node<T> currentNode;
         if (index < size/2) {
             currentNode = head;

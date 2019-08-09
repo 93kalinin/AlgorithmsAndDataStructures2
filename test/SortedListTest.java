@@ -19,7 +19,7 @@ class SortedListTest {
 
         for (int i = elementsAmount; i > 0; --i) {
             int someValue = random.nextInt();
-            actual.add(someValue);
+            actual.append(someValue);
             expected.add(someValue);
         }
         expected.sort(Comparator.naturalOrder());
@@ -38,7 +38,7 @@ class SortedListTest {
 
         for (int i = elementsAmount; i > 0; --i) {
             int someValue = random.nextInt();
-            actual.add(someValue);
+            actual.append(someValue);
             expected.add(someValue);
         }
         expected.sort(someComparator);
@@ -53,10 +53,10 @@ class SortedListTest {
         ArrayList<Integer> expected = new ArrayList<>(elementsAmount);
         for (int i = elementsAmount; i > 0; --i)
             expected.add(random.nextInt());
-        LinkedList<Integer> linkedList = new LinkedList<>();
-        linkedList.addAll(expected);
+        MyLinkedList<Integer> myLinkedList = new MyLinkedList<>();
+        myLinkedList.addAll(expected);
 
-        SortedList<Integer> actual = new SortedList<>(linkedList);
+        SortedList<Integer> actual = new SortedList<>(myLinkedList);
         expected.sort(Comparator.naturalOrder());
 
         Assertions.assertIterableEquals(expected, actual);

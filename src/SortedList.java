@@ -5,11 +5,14 @@ import java.util.Iterator;
 /**
  * This class keeps its elements sorted.
  * The order is natural by default but can be changed via comparators.
- * Its instances can be based on a LinkedList. Heapsort will be employed to sort LinkedList's elements.
+ * SortedList can be based on a LinkedList. Depending on the size of the LinkedList, either selection sort or heapsort
+ * will be employed. NOTE: the original LinkedList's nodes will be removed from it and reused in the new instance
+ * of SortedList.
  */
-public final class SortedList<T extends Comparable<T>> extends LinkedList<T> {
+public final class SortedList<T extends Comparable<T>> extends MyLinkedList<T> {
 
     private final Comparator<T> comparator;
+    public static final int HEAPSORT_WORTHY_SIZE = 10;
 
     SortedList()
     { this.comparator = Comparator.naturalOrder(); }
@@ -17,18 +20,18 @@ public final class SortedList<T extends Comparable<T>> extends LinkedList<T> {
     SortedList(Comparator<T> comparator)
     { this.comparator = comparator; }
 
-    SortedList(LinkedList<T> list) {
+    SortedList(MyLinkedList<T> list) {
         this();
-        sortAndAddAll(list);
+        sortAndAdd(list);
     }
 
-    SortedList(LinkedList<T> list, Comparator<T> comparator) {
+    SortedList(MyLinkedList<T> list, Comparator<T> comparator) {
         this(comparator);
-        sortAndAddAll(list);
+        sortAndAdd(list);
     }
 
     @Override
-    public void add(T newValue) {
+    public void push(T newValue) {
         int insertionIndex = 0;
         for (T value : this) {
             if (comparator.compare(newValue, value) <= 0) break;
@@ -38,20 +41,56 @@ public final class SortedList<T extends Comparable<T>> extends LinkedList<T> {
     }
 
     @Override
-    public void insert(int insertionIndex, T newValue)
-    { throw new UnsupportedOperationException("Random insertion on a sorted list is prohibited. Use add()"); }
+    public void append(T newValue)
+    { this.push(newValue); }
 
-    private void sortAndAddAll(LinkedList<T> list) {
-        ArrayList<T> heap = buildHeap(list);
-        for (int heapSize = list.size; heapSize >= 0; --heapSize) {
-            this.add(heap.get(0));
-            fixHeap(heap, heapSize);
+    @Override
+    public void insert(int insertionIndex, T newValue)
+    { throw new UnsupportedOperationException("Random insertion on a sorted list is prohibited. Use append()"); }
+
+    private void sortAndAdd(MyLinkedList<T> list) {
+        if (list.size <= 1) {
+            // the list is already sorted
         }
+        else if (list.size < HEAPSORT_WORTHY_SIZE) {
+            Node<T> unsortedNode = list.head.next;
+            while (unsortedNode.next.value != null) {
+                Node<T> currentNode = unsortedNode.next;
+                T smallestValue = unsortedNode.value;
+                while (currentNode.value != null) {
+                    if (comparator.compare(currentNode.value, smallestValue) < 0)
+                        smallestValue = currentNode.value;
+                    currentNode = currentNode.next;
+                }
+                unsortedNode.value = smallestValue;
+                unsortedNode = unsortedNode.next;
+            }
+        }
+        else {
+            ArrayList<T> heap = makeHeap(list);
+            for (int heapSize = list.size; heapSize >= 0; --heapSize) {
+                this.append(heap.get(0));
+                fixHeap(heap, heapSize);
+            }
+            Iterator<T> heapIterator = heap.iterator();
+            Node<T> currentNode = list.head.next;
+            while (heapIterator.hasNext()) {
+                currentNode.value = heapIterator.next();
+                currentNode = currentNode.next;
+            }
+        }
+        /* original list's nodes are reused at this point and no longer belong to it */
+        this.head.next = list.head.next;
+        list.head.next.previous = this.head;
+        this.tail.previous = list.tail.previous;
+        list.tail.previous.next = this.tail;
+        list.head.next = null;
+        list.tail.previous = null;
     }
 
-    private ArrayList<T> buildHeap(LinkedList<T> list) {
+    private ArrayList<T> makeHeap(MyLinkedList<T> list) {
         Iterator<T> iterator = list.iterator();
-        ArrayList<T> heap = new ArrayList<>(list.size());
+        ArrayList<T> heap = new ArrayList<>(list.size);
 
         for (int currentIndex = 0; currentIndex < list.size; ++currentIndex) {
             heap.set(currentIndex, iterator.next());

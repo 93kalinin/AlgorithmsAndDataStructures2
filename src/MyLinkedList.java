@@ -7,7 +7,7 @@ import java.util.Objects;
  * A doubly linked list with sentinel nodes at the beginning and the end.
  * It can be used as a standalone class or extended by other classes. Null values are not allowed.
  */
-public class LinkedList<T> implements Iterable<T> {
+public class MyLinkedList<T> implements Iterable<T> {
 
     protected final Node<T> head = new Node<>(null);
     protected final Node<T> tail = new Node<>(null);
@@ -19,9 +19,9 @@ public class LinkedList<T> implements Iterable<T> {
 
     protected static class Node<T> {
 
-        private final T value;
-        private Node<T> next;
-        private Node<T> previous;
+        protected T value;
+        protected Node<T> next;
+        protected Node<T> previous;
 
         Node(T value)
         { this.value = value; }
@@ -83,12 +83,12 @@ public class LinkedList<T> implements Iterable<T> {
     @Override
     public boolean equals(Object that) {
         if (that == this) return true;
-        if (!(that instanceof LinkedList)) return false;
-        LinkedList otherLinkedList = (LinkedList) that;
-        if (otherLinkedList.size() != this.size()) return false;
+        if (!(that instanceof MyLinkedList)) return false;
+        MyLinkedList otherMyLinkedList = (MyLinkedList) that;
+        if (otherMyLinkedList.size() != this.size()) return false;
 
         Iterator thisIterator = this.iterator();
-        Iterator thatIterator = otherLinkedList.iterator();
+        Iterator thatIterator = otherMyLinkedList.iterator();
         while (thisIterator.hasNext()  &&  thatIterator.hasNext())
             if (!thisIterator.next().equals(thatIterator.next())) return false;
         return true;
@@ -137,11 +137,14 @@ public class LinkedList<T> implements Iterable<T> {
         return removed.value;
     }
 
-    public void add(T newValue)
+    public void append(T newValue)
+    { insert(size, newValue); }
+
+    public void push(T newValue)
     { insert(0, newValue); }
 
     public void addAll(Iterable<T> collection)
-    { collection.forEach(this::add); }
+    { collection.forEach(this::append); }
 
     public int size()
     { return size; }

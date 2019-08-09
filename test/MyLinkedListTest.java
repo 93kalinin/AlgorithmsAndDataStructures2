@@ -5,15 +5,15 @@ import org.junit.jupiter.api.function.Executable;
 
 import java.util.*;
 
-class LinkedListTest {
+class MyLinkedListTest {
 
     private static Random random = new Random(System.currentTimeMillis());
 
     @Test
     @DisplayName("random insertions and iterator removals")
     void iteratorRemoval() {
-        LinkedList<Integer> actual = new LinkedList<>();
-        java.util.LinkedList<Integer> expected = new java.util.LinkedList<>();
+        MyLinkedList<Integer> actual = new MyLinkedList<>();
+        LinkedList<Integer> expected = new java.util.LinkedList<>();
         int insertionsCount = random.nextInt(11) +15;    // 15..25
 
         for (int i = insertionsCount; i > 0; --i) {
@@ -39,8 +39,8 @@ class LinkedListTest {
     @Test
     @DisplayName("random insertions and removals")
     void removals() {
-        LinkedList<Integer> actual = new LinkedList<>();
-        java.util.LinkedList<Integer> expected = new java.util.LinkedList<>();
+        MyLinkedList<Integer> actual = new MyLinkedList<>();
+        LinkedList<Integer> expected = new java.util.LinkedList<>();
         int insertionsCount = random.nextInt(11) +15;    // 15..25
 
         for (int i = insertionsCount; i > 0; --i) {
@@ -60,13 +60,13 @@ class LinkedListTest {
     @Test
     @DisplayName("iterator throws if the list is modified during iteration")
     void iteratorThrowsIfModified() {
-        LinkedList<String> testList = new LinkedList<>();
-        testList.add("need at least 2 items");
-        testList.add("one more");
+        MyLinkedList<String> testList = new MyLinkedList<>();
+        testList.append("need at least 2 items");
+        testList.append("one more");
 
         Executable wrongMove = () -> {
             for (String ignored : testList)
-                testList.add("woops!");
+                testList.append("woops!");
         };
 
         Assertions.assertThrows(ConcurrentModificationException.class, wrongMove);
@@ -75,8 +75,8 @@ class LinkedListTest {
     @Test
     @DisplayName("iterator throws if remove() is called before next()")
     void iteratorThrowsOnEarlyRemove() {
-        LinkedList<String> testList = new LinkedList<>();
-        testList.add("something to remove");
+        MyLinkedList<String> testList = new MyLinkedList<>();
+        testList.append("something to remove");
         Iterator<String> iter = testList.iterator();
 
         Assertions.assertThrows(IllegalStateException.class, iter::remove);
@@ -85,9 +85,9 @@ class LinkedListTest {
     @Test
     @DisplayName("iterator throws if remove() is called twice in a row")
     void iteratorThrowsOnDoubleRemove() {
-        LinkedList<String> list = new LinkedList<>();
-        list.add("nonempty list");
-        list.add("one more");
+        MyLinkedList<String> list = new MyLinkedList<>();
+        list.append("nonempty list");
+        list.append("one more");
         Iterator<String> iter = list.iterator();
 
         iter.next();
@@ -100,11 +100,11 @@ class LinkedListTest {
     @Test
     @DisplayName("if iterator is currently on the item B, then after list.remove(indexOfB) iterator.remove() throws")
     void iteratorThrowsIfRemoveItemUnderneathIt() {
-        LinkedList<String> linkedList = new LinkedList<>();
-        linkedList.add("gone");
-        Iterator<String> iterator = linkedList.iterator();
+        MyLinkedList<String> myLinkedList = new MyLinkedList<>();
+        myLinkedList.append("gone");
+        Iterator<String> iterator = myLinkedList.iterator();
         iterator.next();
-        linkedList.remove(0);
+        myLinkedList.remove(0);
 
         Executable wrongMove = iterator::remove;
 

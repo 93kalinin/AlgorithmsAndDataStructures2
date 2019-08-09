@@ -5,8 +5,8 @@ import java.util.Iterator;
 /**
  * This class keeps its elements sorted.
  * The order is natural by default but can be changed via comparators.
- * SortedList can be based on a LinkedList. Depending on the size of the LinkedList, either selection sort or heapsort
- * will be employed. NOTE: the original LinkedList's nodes will be removed from it and reused in the new instance
+ * SortedList can be based on a MyLinkedList. Depending on the size of the LinkedList, either selection sort or heapsort
+ * will be employed. NOTE: the original MyLinkedList's nodes will be removed from it and reused in the new instance
  * of SortedList.
  */
 public final class SortedList<T extends Comparable<T>> extends MyLinkedList<T> {
@@ -53,18 +53,24 @@ public final class SortedList<T extends Comparable<T>> extends MyLinkedList<T> {
             // the list is already sorted
         }
         else if (list.size < HEAPSORT_WORTHY_SIZE) {
-            Node<T> unsortedNode = list.head.next;
-            while (unsortedNode.next.value != null) {
-                Node<T> currentNode = unsortedNode.next;
-                T smallestValue = unsortedNode.value;
-                while (currentNode.value != null) {
-                    if (comparator.compare(currentNode.value, smallestValue) < 0)
-                        smallestValue = currentNode.value;
-                    currentNode = currentNode.next;
+            ArrayList<T> array = new ArrayList<>(list.size);
+            for (T value : list)
+                array.add(value);
+
+            for (int unsortedPartIndex = 0; unsortedPartIndex < array.size(); ++unsortedPartIndex) {
+                T smallestValue = array.get(unsortedPartIndex);
+                int smallestValueIndex = unsortedPartIndex;
+                for (int currentIndex = unsortedPartIndex +1; currentIndex < array.size(); ++currentIndex) {
+                    T currentValue = array.get(currentIndex);
+                    if (comparator.compare(currentValue, smallestValue) < 0) {
+                        smallestValue = currentValue;
+                        smallestValueIndex = currentIndex;
+                    }
                 }
-                unsortedNode.value = smallestValue;
-                unsortedNode = unsortedNode.next;
+                array.set(smallestValueIndex, array.get(unsortedPartIndex));
+                array.set(unsortedPartIndex, smallestValue);
             }
+            copyArrayToThatList(array, list);
         }
         else {
             ArrayList<T> heap = makeHeap(list);
@@ -72,12 +78,7 @@ public final class SortedList<T extends Comparable<T>> extends MyLinkedList<T> {
                 this.append(heap.get(0));
                 fixHeap(heap, heapSize);
             }
-            Iterator<T> heapIterator = heap.iterator();
-            Node<T> currentNode = list.head.next;
-            while (heapIterator.hasNext()) {
-                currentNode.value = heapIterator.next();
-                currentNode = currentNode.next;
-            }
+            copyArrayToThatList(heap, list);
         }
         /* original list's nodes are reused at this point and no longer belong to it */
         this.head.next = list.head.next;
@@ -86,6 +87,15 @@ public final class SortedList<T extends Comparable<T>> extends MyLinkedList<T> {
         list.tail.previous.next = this.tail;
         list.head.next = null;
         list.tail.previous = null;
+    }
+
+    private void copyArrayToThatList(ArrayList<T> array, MyLinkedList<T> list) {
+        Iterator<T> heapIterator = array.iterator();
+        Node<T> currentNode = list.head.next;
+        while (heapIterator.hasNext()) {
+            currentNode.value = heapIterator.next();
+            currentNode = currentNode.next;
+        }
     }
 
     private ArrayList<T> makeHeap(MyLinkedList<T> list) {

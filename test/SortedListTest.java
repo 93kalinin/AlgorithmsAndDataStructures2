@@ -47,13 +47,14 @@ class SortedListTest {
     }
 
     @Test
-    @DisplayName("sorts LinkedList")
+    @DisplayName("sorts MyLinkedList with selection sort")
     void sortsLinkedList() {
-        int elementsAmount = random.nextInt(11) +15;    // 15..25
+        int elementsAmount = random.nextInt(5) +5;    // 5..9
         ArrayList<Integer> expected = new ArrayList<>(elementsAmount);
-        for (int i = elementsAmount; i > 0; --i)
-            expected.add(random.nextInt());
         MyLinkedList<Integer> myLinkedList = new MyLinkedList<>();
+        random.ints()
+                .limit(elementsAmount)
+                .forEach(expected::add);
         myLinkedList.addAll(expected);
 
         SortedList<Integer> actual = new SortedList<>(myLinkedList);

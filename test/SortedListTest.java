@@ -48,8 +48,25 @@ class SortedListTest {
 
     @Test
     @DisplayName("sorts MyLinkedList with selection sort")
-    void sortsLinkedList() {
+    void selectionSort() {
         int elementsAmount = random.nextInt(5) +5;    // 5..9
+        ArrayList<Integer> expected = new ArrayList<>(elementsAmount);
+        MyLinkedList<Integer> myLinkedList = new MyLinkedList<>();
+        random.ints()
+                .limit(elementsAmount)
+                .forEach(expected::add);
+        myLinkedList.addAll(expected);
+
+        SortedList<Integer> actual = new SortedList<>(myLinkedList);
+        expected.sort(Comparator.naturalOrder());
+
+        Assertions.assertIterableEquals(expected, actual);
+    }
+
+    @Test
+    @DisplayName("sorts MyLinkedList with heapsort")
+    void heapSort() {
+        int elementsAmount = random.nextInt(11) +15;    // 15..25
         ArrayList<Integer> expected = new ArrayList<>(elementsAmount);
         MyLinkedList<Integer> myLinkedList = new MyLinkedList<>();
         random.ints()

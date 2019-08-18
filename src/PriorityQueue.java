@@ -111,12 +111,22 @@ public class PriorityQueue<T extends Comparable<T>> {
         if (this.isEmpty())
             throw new IllegalStateException("This queue is empty");
 
-        T smallest = heap.get(0).root.value;
+        Tree target = this.heap.removeAndReturn(0);
+        T smallest = target.root.value;
         for (Tree tree : heap) {
             T value = tree.root.value;
             if (comparator.compare(value, smallest) < 0)
                 smallest = value;
         }
+
+        LinkedList<Tree> trees = new SortedList<>();
+        for (Node<T> node : target.root.children)
+            trees.add(new Tree(node));
+        SortedList<Tree> newHeap = new SortedList<>(trees);
+        PriorityQueue<T> newQueue = new PriorityQueue<>(this.comparator);
+        newQueue.heap = newHeap;
+        enqueue(newQueue);
+
         return smallest;
     }
 

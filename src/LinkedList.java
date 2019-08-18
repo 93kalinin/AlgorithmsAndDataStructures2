@@ -132,9 +132,6 @@ public class LinkedList<T> implements Iterable<T> {
         return removed.value;
     }
 
-    public T get(int index)
-    { return getNodeByIndex(index).value; }
-
     public void add(T newValue)
     { insert(size, newValue); }
 

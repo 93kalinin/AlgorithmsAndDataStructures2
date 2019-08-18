@@ -19,7 +19,7 @@ class SortedListTest {
 
         for (int i = elementsAmount; i > 0; --i) {
             int someValue = random.nextInt();
-            actual.append(someValue);
+            actual.add(someValue);
             expected.add(someValue);
         }
         expected.sort(Comparator.naturalOrder());
@@ -38,7 +38,7 @@ class SortedListTest {
 
         for (int i = elementsAmount; i > 0; --i) {
             int someValue = random.nextInt();
-            actual.append(someValue);
+            actual.add(someValue);
             expected.add(someValue);
         }
         expected.sort(someComparator);
@@ -51,13 +51,13 @@ class SortedListTest {
     void selectionSort() {
         int elementsAmount = random.nextInt(5) +5;    // 5..9
         ArrayList<Integer> expected = new ArrayList<>(elementsAmount);
-        MyLinkedList<Integer> myLinkedList = new MyLinkedList<>();
+        LinkedList<Integer> linkedList = new LinkedList<>();
         random.ints()
                 .limit(elementsAmount)
                 .forEach(expected::add);
-        myLinkedList.addAll(expected);
+        linkedList.addAll(expected);
 
-        SortedList<Integer> actual = new SortedList<>(myLinkedList);
+        SortedList<Integer> actual = new SortedList<>(linkedList);
         expected.sort(Comparator.naturalOrder());
 
         Assertions.assertIterableEquals(expected, actual);
@@ -68,13 +68,13 @@ class SortedListTest {
     void heapSort() {
         int elementsAmount = random.nextInt(11) +15;    // 15..25
         ArrayList<Integer> expected = new ArrayList<>(elementsAmount);
-        MyLinkedList<Integer> myLinkedList = new MyLinkedList<>();
+        LinkedList<Integer> linkedList = new LinkedList<>();
         random.ints()
                 .limit(elementsAmount)
                 .forEach(expected::add);
-        myLinkedList.addAll(expected);
+        linkedList.addAll(expected);
 
-        SortedList<Integer> actual = new SortedList<>(myLinkedList);
+        SortedList<Integer> actual = new SortedList<>(linkedList);
         expected.sort(Comparator.naturalOrder());
 
         Assertions.assertIterableEquals(expected, actual);

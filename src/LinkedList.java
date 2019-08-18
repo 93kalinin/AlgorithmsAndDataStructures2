@@ -1,13 +1,11 @@
-import java.util.ConcurrentModificationException;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * A doubly linked list with sentinel nodes at the beginning and the end.
  * It can be used as a standalone class or extended by other classes. Null values are not allowed.
  */
-public class MyLinkedList<T> implements Iterable<T> {
+//TODO: use bounded wildcard? (Bloch, item 31). implement ListIterator?
+public class LinkedList<T> implements Iterable<T> {
 
     protected final Node<T> head = new Node<>(null);
     protected final Node<T> tail = new Node<>(null);
@@ -17,13 +15,13 @@ public class MyLinkedList<T> implements Iterable<T> {
     protected int modCount;
     protected int size;
 
-    protected static class Node<T> {
+    protected static class Node<E> {
 
-        protected T value;
-        protected Node<T> next;
-        protected Node<T> previous;
+        protected E value;
+        protected Node<E> next;
+        protected Node<E> previous;
 
-        Node(T value)
+        Node(E value)
         { this.value = value; }
 
         @Override
@@ -34,7 +32,7 @@ public class MyLinkedList<T> implements Iterable<T> {
         }
     }
 
-    protected class LinkedListIterator<E> implements Iterator<T> {
+    protected class ListIterator implements Iterator<T> {
 
         Node<T> currentNode = head;
         int expectedModCount = modCount;
@@ -78,17 +76,17 @@ public class MyLinkedList<T> implements Iterable<T> {
 
     @Override
     public Iterator<T> iterator()
-    { return new LinkedListIterator<T>(); }
+    { return new ListIterator(); }
 
     @Override
     public boolean equals(Object that) {
         if (that == this) return true;
-        if (!(that instanceof MyLinkedList)) return false;
-        MyLinkedList otherMyLinkedList = (MyLinkedList) that;
-        if (otherMyLinkedList.size() != this.size()) return false;
+        if (!(that instanceof LinkedList)) return false;
+        LinkedList otherLinkedList = (LinkedList) that;
+        if (otherLinkedList.size() != this.size()) return false;
 
         Iterator thisIterator = this.iterator();
-        Iterator thatIterator = otherMyLinkedList.iterator();
+        Iterator thatIterator = otherLinkedList.iterator();
         while (thisIterator.hasNext()  &&  thatIterator.hasNext())
             if (!thisIterator.next().equals(thatIterator.next())) return false;
         return true;
@@ -122,10 +120,7 @@ public class MyLinkedList<T> implements Iterable<T> {
         modCount++;
     }
 
-    public T remove(int index) {
-        if (index < 0  ||  index >= size)
-            throw new IllegalArgumentException("Invalid index: " + index);
-
+    public T removeAndReturn(int index) {
         Node<T> removed = getNodeByIndex(index);
         Node<T> left = removed.previous;
         Node<T> right = removed.next;
@@ -137,19 +132,22 @@ public class MyLinkedList<T> implements Iterable<T> {
         return removed.value;
     }
 
-    public void append(T newValue)
+    public T get(int index)
+    { return getNodeByIndex(index).value; }
+
+    public void add(T newValue)
     { insert(size, newValue); }
 
-    public void push(T newValue)
-    { insert(0, newValue); }
-
     public void addAll(Iterable<T> collection)
-    { collection.forEach(this::append); }
+    { collection.forEach(this::add); }
 
     public int size()
     { return size; }
 
     protected Node<T> getNodeByIndex(int index) {
+        if (index < 0  ||  index >= size)
+            throw new IllegalArgumentException("Invalid index: " + index);
+
         Node<T> currentNode;
         if (index < size/2) {
             currentNode = head;

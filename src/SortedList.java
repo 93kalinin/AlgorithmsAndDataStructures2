@@ -5,10 +5,9 @@ import java.util.Comparator;
  * This class keeps its elements sorted.
  * The order is natural by default but can be changed via comparators.
  * SortedList can be based on a MyLinkedList. Depending on the size of the LinkedList, either selection sort or
- * heapsort will be employed. NOTE: the original MyLinkedList's nodes will be removed from it and reused in the
- * new instance of SortedList.
+ * heapsort will be employed.
  */
-public final class SortedList<T extends Comparable<T>> extends MyLinkedList<T> {
+public class SortedList<T extends Comparable<T>> extends LinkedList<T> {
 
     public final Comparator<T> comparator;
     public static final int HEAPSORT_WORTHY_SIZE = 10;
@@ -19,18 +18,18 @@ public final class SortedList<T extends Comparable<T>> extends MyLinkedList<T> {
     SortedList(Comparator<T> comparator)
     { this.comparator = comparator; }
 
-    SortedList(MyLinkedList<T> list) {
+    SortedList(LinkedList<T> list) {
         this();
-        sortAndReuse(list);
+        sortAndAdd(list);
     }
 
-    SortedList(MyLinkedList<T> list, Comparator<T> comparator) {
+    SortedList(LinkedList<T> list, Comparator<T> comparator) {
         this(comparator);
-        sortAndReuse(list);
+        sortAndAdd(list);
     }
 
     @Override
-    public void push(T newValue) {
+    public void add(T newValue) {
         int insertionIndex = 0;
         for (T value : this) {
             if (comparator.compare(newValue, value) <= 0) break;
@@ -40,41 +39,25 @@ public final class SortedList<T extends Comparable<T>> extends MyLinkedList<T> {
     }
 
     @Override
-    public void append(T newValue)
-    { this.push(newValue); }
-
-    @Override
     public void insert(int insertionIndex, T newValue)
-    { throw new UnsupportedOperationException("Random insertion on a sorted list is prohibited. Use append()"); }
+    { throw new UnsupportedOperationException("Random insertion on a sorted list is prohibited. Use add()"); }
 
-    private void sortAndReuse(MyLinkedList<T> list) {
+    private void sortAndAdd(LinkedList<T> list) {
         ArrayList<T> unsortedArray = new ArrayList<>(list.size);
         for (T value : list)
             unsortedArray.add(value);
+
         ArrayList<T> sortedArray = (list.size <= 1) ? unsortedArray
                 : (list.size < HEAPSORT_WORTHY_SIZE) ? selectionSort(unsortedArray)
                 : heapSort(unsortedArray);
-
-        Node<T> currentNode = list.head.next;
-        for (T value : sortedArray) {
-            currentNode.value = value;
-            currentNode = currentNode.next;
-        }
-        /* reuse original list's nodes */
-        this.head.next = list.head.next;
-        list.head.next.previous = this.head;
-        this.tail.previous = list.tail.previous;
-        list.tail.previous.next = this.tail;
-        list.head.next = null;
-        list.tail.previous = null;
-        list.size = 0;
+        this.addAll(sortedArray);
     }
 
     private ArrayList<T> selectionSort(ArrayList<T> array) {
         for (int unsortedPartIndex = 0; unsortedPartIndex < array.size(); ++unsortedPartIndex) {
             T smallestValue = array.get(unsortedPartIndex);
             int smallestValueIndex = unsortedPartIndex;
-            for (int currentIndex = unsortedPartIndex + 1; currentIndex < array.size(); ++currentIndex) {
+            for (int currentIndex = unsortedPartIndex +1; currentIndex < array.size(); ++currentIndex) {
                 T currentValue = array.get(currentIndex);
                 if (comparator.compare(currentValue, smallestValue) < 0) {
                     smallestValue = currentValue;
@@ -88,8 +71,8 @@ public final class SortedList<T extends Comparable<T>> extends MyLinkedList<T> {
     }
 
     private ArrayList<T> heapSort(ArrayList<T> array) {
-        for (int heapEndIndex = 0; heapEndIndex < array.size(); ++heapEndIndex) {
-            int newItemIndex = heapEndIndex;
+        for (int heapLastNodeIndex = 0; heapLastNodeIndex < array.size(); ++heapLastNodeIndex) {
+            int newItemIndex = heapLastNodeIndex;
             while (newItemIndex != 0) {
                 int parentIndex = (newItemIndex -1) /2;
                 T newItem = array.get(newItemIndex);
@@ -110,15 +93,15 @@ public final class SortedList<T extends Comparable<T>> extends MyLinkedList<T> {
         return array;
     }
 
-    private void fixHeap(ArrayList<T> heap, int heapEndIndex) {
-        T lastItem = heap.get(heapEndIndex);
+    private void fixHeap(ArrayList<T> heap, int heapLastNodeIndex) {
+        T lastItem = heap.get(heapLastNodeIndex);
         heap.set(0, lastItem);
         int parentIndex = 0;
         T parent = heap.get(parentIndex);
 
         while (true) {
-            int child1Index = (2*parentIndex +1 >= heapEndIndex) ? parentIndex : 2*parentIndex +1;
-            int child2Index = (2*parentIndex +2 >= heapEndIndex) ? parentIndex : 2*parentIndex +2;
+            int child1Index = (2*parentIndex +1 >= heapLastNodeIndex) ? parentIndex : 2*parentIndex +1;
+            int child2Index = (2*parentIndex +2 >= heapLastNodeIndex) ? parentIndex : 2*parentIndex +2;
             T child1 = heap.get(child1Index);
             T child2 = heap.get(child2Index);
             if (comparator.compare(child1, parent) <= 0  &&  comparator.compare(child2, parent) <= 0)

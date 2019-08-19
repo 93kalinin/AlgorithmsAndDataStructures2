@@ -105,8 +105,6 @@ public class LinkedList<T> implements Iterable<T> {
 
     public void insert(int index, T newValue) {
         Objects.requireNonNull(newValue, "Null values are prohibited");
-        if (index < 0  ||  index > size)
-            throw new IllegalArgumentException("Invalid index: " + index);
 
         Node<T> right = getNodeByIndex(index);
         Node<T> left = right.previous;
@@ -120,7 +118,10 @@ public class LinkedList<T> implements Iterable<T> {
         modCount++;
     }
 
-    public T removeAndReturn(int index) {
+    public T remove(int index) {
+        if (index < 0  ||  index >= size)
+            throw new IllegalArgumentException("Invalid index: " + index);
+
         Node<T> removed = getNodeByIndex(index);
         Node<T> left = removed.previous;
         Node<T> right = removed.next;
@@ -130,6 +131,13 @@ public class LinkedList<T> implements Iterable<T> {
         size--;
         modCount++;
         return removed.value;
+    }
+
+    public T peek(int index) {
+        if (index < 0  ||  index >= size)
+            throw new IllegalArgumentException("Invalid index: " + index);
+
+        return getNodeByIndex(index).value;
     }
 
     public void add(T newValue)
@@ -142,7 +150,7 @@ public class LinkedList<T> implements Iterable<T> {
     { return size; }
 
     protected Node<T> getNodeByIndex(int index) {
-        if (index < 0  ||  index >= size)
+        if (index < 0  ||  index > size)
             throw new IllegalArgumentException("Invalid index: " + index);
 
         Node<T> currentNode;

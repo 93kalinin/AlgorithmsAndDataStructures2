@@ -50,7 +50,7 @@ class LinkedListTest {
             expected.add(validIndex, someValue);
             if (random.nextBoolean()) {
                 validIndex = getRandomRemovalIndex(actual.size());
-                actual.removeAndReturn(validIndex);
+                actual.remove(validIndex);
                 expected.remove(validIndex);
             }
         }
@@ -104,7 +104,7 @@ class LinkedListTest {
         linkedList.add("gone");
         Iterator<String> iterator = linkedList.iterator();
         iterator.next();
-        linkedList.removeAndReturn(0);
+        linkedList.remove(0);
 
         Executable wrongMove = iterator::remove;
 

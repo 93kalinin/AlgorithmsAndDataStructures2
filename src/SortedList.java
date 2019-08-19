@@ -2,9 +2,9 @@ import java.util.ArrayList;
 import java.util.Comparator;
 
 /**
- * This class keeps its elements sorted.
+ * This collection keeps its elements sorted.
  * The order is natural by default but can be changed via comparators.
- * SortedList can be based on a MyLinkedList. Depending on the size of the LinkedList, either selection sort or
+ * SortedList can be based on a LinkedList. Depending on the size of the LinkedList, either selection sort or
  * heapsort will be employed.
  */
 public class SortedList<T extends Comparable<T>> extends LinkedList<T> {

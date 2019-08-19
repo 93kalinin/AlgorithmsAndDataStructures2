@@ -28,8 +28,8 @@ public class PriorityQueue<T extends Comparable<T>> {
         int getOrder()
         { return root.children.size; }
 
-        boolean isNonempty()
-        { return this == emptyTree; }
+        boolean isEmpty()
+        { return this.root == null; }
 
         @Override
         public int compareTo(Tree that)
@@ -37,12 +37,12 @@ public class PriorityQueue<T extends Comparable<T>> {
 
         /**
          * This method allows to just meld multiple trees without trying to find out which of them is nonempty.
-         * Any amount of them can be passed to it via method chaining.
+         * Any amount of them can be passed to it via method call chaining.
          */
         Tree meldWith(Tree that) {
-            if (that == emptyTree)
+            if (that.isEmpty())
                 return this;
-            if (this == emptyTree)
+            if (this.isEmpty())
                 return that;
             if (this.getOrder() != that.getOrder())
                 throw new IllegalArgumentException("An attempt to meld trees of different orders has been made");
@@ -52,6 +52,10 @@ public class PriorityQueue<T extends Comparable<T>> {
             smaller.root.children.add(bigger.root);
             return smaller;
         }
+
+        @Override
+        public String toString()
+        { return this.isEmpty() ? "empty" : this.root.value.toString(); }
     }
 
     /**
@@ -93,41 +97,43 @@ public class PriorityQueue<T extends Comparable<T>> {
         };
     }
 
-    public void enqueue(PriorityQueue<T> that) {
+    public void offer(PriorityQueue<T> that) {
         HeapIterator thisIter = new HeapIterator(this.heap.iterator());
         HeapIterator thatIter = new HeapIterator(that.heap.iterator());
         this.heap = new SortedList<>();
         meldHeaps(thisIter, thatIter, emptyTree);
     }
 
-    public void enqueue(T item) {
+    public void offer(T item) {
         Tree tree = new Tree(new Node<T>(item));
         PriorityQueue<T> queue = new PriorityQueue<>(comparator);
         queue.heap.add(tree);
-        enqueue(queue);
+        offer(queue);
     }
 
-    public T dequeue() {
+    public T poll() {
         if (this.isEmpty())
             throw new IllegalStateException("This queue is empty");
 
-        Tree target = this.heap.removeAndReturn(0);
-        T smallest = target.root.value;
-        for (Tree tree : heap) {
-            T value = tree.root.value;
-            if (comparator.compare(value, smallest) < 0)
-                smallest = value;
+        int smallestRootValueIndex = 0;
+        T smallestRootValue = this.heap.peek(smallestRootValueIndex).root.value;
+        Iterator<Tree> thisHeapIterator = this.heap.iterator();
+        for (int currentIndex = 0; thisHeapIterator.hasNext(); ++currentIndex) {
+            T currentValue = thisHeapIterator.next().root.value;
+            if (comparator.compare(currentValue, smallestRootValue) < 0) {
+                smallestRootValueIndex = currentIndex;
+                smallestRootValue = currentValue;
+            }
         }
-
-        LinkedList<Tree> trees = new SortedList<>();
+        Tree target = this.heap.remove(smallestRootValueIndex);
+        LinkedList<Tree> trees = new LinkedList<>();
         for (Node<T> node : target.root.children)
             trees.add(new Tree(node));
         SortedList<Tree> newHeap = new SortedList<>(trees);
-        PriorityQueue<T> newQueue = new PriorityQueue<>(this.comparator);
-        newQueue.heap = newHeap;
-        enqueue(newQueue);
-
-        return smallest;
+        PriorityQueue<T> targetTreeChildren = new PriorityQueue<>(this.comparator);
+        targetTreeChildren.heap = newHeap;
+        offer(targetTreeChildren);
+        return smallestRootValue;
     }
 
     public boolean isEmpty()
@@ -135,7 +141,7 @@ public class PriorityQueue<T extends Comparable<T>> {
 
     /**
      * Merges two heaps into one. The amount of trees in each binomial heap is not more than log2(N), where N is
-     * the number of elements in the heap, so the recursion here is relatively shallow.
+     * the number of elements in the heap, so the recursion here is shallow.
      * @param previousTree -- a tree obtained at the previous level of recursion.
      */
     private void meldHeaps(HeapIterator heap1, HeapIterator heap2, Tree previousTree) {
@@ -144,9 +150,9 @@ public class PriorityQueue<T extends Comparable<T>> {
         Tree tree2 = (heap2.nextTree.getOrder() == currentOrder) ? heap2.next() : emptyTree;
 
         int nonemptyTreesCount = 0;
-        if (tree1.isNonempty()) nonemptyTreesCount++;
-        if (tree2.isNonempty()) nonemptyTreesCount++;
-        if (previousTree.isNonempty()) nonemptyTreesCount++;
+        if (!tree1.isEmpty()) nonemptyTreesCount++;
+        if (!tree2.isEmpty()) nonemptyTreesCount++;
+        if (!previousTree.isEmpty()) nonemptyTreesCount++;
 
         switch (nonemptyTreesCount) {
             case 1: Tree nonemptyTree = tree1.meldWith(tree2).meldWith(previousTree);

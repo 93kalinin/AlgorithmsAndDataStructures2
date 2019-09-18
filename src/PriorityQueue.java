@@ -2,9 +2,11 @@ import java.util.Comparator;
 import java.util.Iterator;
 
 /**
- * A binomial-heap-based implementation of a priority queue.
+ * A binomial-heap-based implementation of a priority queue. It is not optimal but it works.
  * Null values are not allowed.
  */
+//TODO: it would be substantially faster to store empty trees in the heap and just change them as required during
+// heaps merging. They can be sorted right after the merging is complete. Iterator? equals(), hashCode()
 public class PriorityQueue<T extends Comparable<T>> {
 
     private static class Node<E extends Comparable<E>> {
@@ -126,10 +128,10 @@ public class PriorityQueue<T extends Comparable<T>> {
             }
         }
         Tree target = this.heap.remove(smallestRootValueIndex);
-        LinkedList<Tree> trees = new LinkedList<>();
+        LinkedList<Tree> forest = new LinkedList<>();
         for (Node<T> node : target.root.children)
-            trees.add(new Tree(node));
-        SortedList<Tree> newHeap = new SortedList<>(trees);
+            forest.add(new Tree(node));
+        SortedList<Tree> newHeap = new SortedList<>(forest);
         PriorityQueue<T> targetTreeChildren = new PriorityQueue<>(this.comparator);
         targetTreeChildren.heap = newHeap;
         offer(targetTreeChildren);
